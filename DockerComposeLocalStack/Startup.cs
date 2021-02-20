@@ -1,5 +1,9 @@
+using System;
+using System.Data;
+using DockerComposeLocalStack.DataAccess;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -20,14 +24,23 @@ namespace DockerComposeLocalStack
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton(Configuration);
+
             services.AddHealthChecks()
-                .AddSqlServer(Configuration.GetConnectionString("Master"))
+                .AddSqlServer(Configuration.GetConnectionString("Master"), name: "Master")
+                .AddSqlServer(Configuration.GetConnectionString("Messages"), name: "Messages")
                 .AddCheck<SqlServerReadinessCheck>(nameof(SqlServerReadinessCheck));
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "DockerComposeLocalStack", Version = "v1"});
             });
+
+            services.AddTransient<IDbConnection>(provider => new SqlConnection(provider.GetRequiredService<IConfiguration>().GetConnectionString("Messages")));
+            services.AddTransient<IGetMessagesCommand, GetMessagesCommand>();
+            services.AddTransient<Func<IGetMessagesCommand>>(provider => provider.GetRequiredService<IGetMessagesCommand>);
+            services.AddTransient<ISaveMessageCommand, SaveMessagesCommand>();
+            services.AddTransient<Func<ISaveMessageCommand>>(provider => provider.GetRequiredService<ISaveMessageCommand>);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
