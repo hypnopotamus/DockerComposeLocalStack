@@ -1,3 +1,4 @@
+using Messages;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -43,6 +44,8 @@ namespace DockerComposeLocalStack
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthorization();
+
+            Database.Create(Configuration.GetConnectionString("Messages"));
 
             app.UseEndpoints(endpoints =>
             {
