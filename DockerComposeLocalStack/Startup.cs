@@ -1,3 +1,5 @@
+using System;
+using DockerComposeLocalStack.DataAccess;
 using Messages;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -34,6 +36,11 @@ namespace DockerComposeLocalStack
             {
                 c.SwaggerDoc("v1", new OpenApiInfo {Title = "DockerComposeLocalStack", Version = "v1"});
             });
+
+            services.AddTransient<IGetMessagesCommand, GetMessageCommand>();
+            services.AddTransient<Func<IGetMessagesCommand>>(provider => provider.GetRequiredService<IGetMessagesCommand>);
+            services.AddTransient<ISaveMessageCommand, SaveMessageCommand>();
+            services.AddTransient<Func<ISaveMessageCommand>>(provider => provider.GetRequiredService<ISaveMessageCommand>);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

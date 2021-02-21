@@ -13,8 +13,9 @@ namespace Messages
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Message>()
-                .HasNoKey()
+            var messageEntity = modelBuilder.Entity<Message>();
+            messageEntity.HasKey(m => m.Key);
+            messageEntity
                 .Property(m => m.Value)
                 .IsRequired();
         }
